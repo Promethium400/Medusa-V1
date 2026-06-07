@@ -49,7 +49,7 @@ export function Register() {
     }
   }, []);
   const load = useCallback(async () => {
-    const { token } = await (
+    const { token, jwt } = await (
       await fetch(`/auth/oauth/${provider?.toUpperCase() || 'LOCAL'}/exists`, {
         method: 'POST',
         body: JSON.stringify({
@@ -60,6 +60,8 @@ export function Register() {
     if (token) {
       setCode(token);
       setShow(true);
+    } else if (jwt) {
+      window.location.href = '/';
     }
   }, [provider, code]);
   if (!code && !provider) {
