@@ -87,7 +87,14 @@ export async function proxy(request: NextRequest) {
   }
 
   // Bypass authentication: Always generate a dummy cookie if none exists
-  if (!authCookie && !nextUrl.pathname.startsWith('/api')) {
+  if (
+    !authCookie &&
+    !nextUrl.pathname.startsWith('/api') &&
+    !nextUrl.pathname.startsWith('/launches') &&
+    !nextUrl.pathname.startsWith('/analytics') &&
+    !nextUrl.pathname.startsWith('/auth') &&
+    !nextUrl.pathname.startsWith('/_next')
+  ) {
     const response = NextResponse.redirect(new URL(`/`, nextUrl.href));
     response.cookies.set('auth', 'dummy-token-for-bypass', {
       path: '/',
