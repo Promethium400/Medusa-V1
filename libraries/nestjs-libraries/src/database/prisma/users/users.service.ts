@@ -12,6 +12,10 @@ export class UsersService {
     private _organizationRepository: OrganizationRepository
   ) {}
 
+  getFirstUser() {
+    return this._usersRepository.getFirstUser();
+  }
+
   getUserByEmail(email: string) {
     return this._usersRepository.getUserByEmail(email);
   }

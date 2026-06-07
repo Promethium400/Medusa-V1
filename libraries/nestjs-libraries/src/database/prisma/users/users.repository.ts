@@ -9,6 +9,10 @@ import { EmailNotificationsDto } from '@gitroom/nestjs-libraries/dtos/users/emai
 export class UsersRepository {
   constructor(private _user: PrismaRepository<'user'>) {}
 
+  getFirstUser() {
+    return this._user.model.user.findFirst();
+  }
+
   getImpersonateUser(name: string) {
     return this._user.model.user.findMany({
       where: {

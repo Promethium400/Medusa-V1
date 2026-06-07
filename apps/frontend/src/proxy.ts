@@ -86,24 +86,26 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login', nextUrl.href));
   }
 
+  // Bypass authentication: Always generate a dummy cookie if none exists
+  if (!authCookie && !nextUrl.pathname.startsWith('/api')) {
+    const response = NextResponse.redirect(new URL(`/`, nextUrl.href));
+    response.cookies.set('auth', 'dummy-token-for-bypass', {
+      path: '/',
+      ...(!process.env.NOT_SECURED
+        ? {
+            secure: true,
+            httpOnly: true,
+            sameSite: false,
+            domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+          }
+        : {}),
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365), // 1 year
+    });
+    return response;
+  }
+
   const org = nextUrl.searchParams.get('org');
   const url = new URL(nextUrl).search;
-  if (!nextUrl.pathname.startsWith('/auth') && !authCookie) {
-    const providers = ['settings', 'google'];
-    const findIndex = providers.find((p) => nextUrl.href.indexOf(p) > -1);
-    const additional = !findIndex
-      ? ''
-      : (url.indexOf('?') > -1 ? '&' : '?') +
-        `provider=${(findIndex === 'settings'
-          ? process.env.POSTIZ_GENERIC_OAUTH
-            ? 'generic'
-            : 'github'
-          : findIndex
-        ).toUpperCase()}`;
-    return NextResponse.redirect(
-      new URL(`/auth${url}${additional}`, nextUrl.href)
-    );
-  }
 
   // If the url is /auth and the cookie exists, redirect to /
   if (nextUrl.pathname.startsWith('/auth') && authCookie) {
